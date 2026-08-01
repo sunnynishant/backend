@@ -13,20 +13,25 @@ const registerUser=asyncHandler(async (req,res)=>{
  //remove password and refresjh tokenfield from response
  //check for user creation
  //return response
+ console.log("sunny")
  const {fullName,email,username,password}=req.body;
  console.log(email);
  if([fullName,email,username,password].some((field)=>field?.trim()==="")){
  throw new ApiError(400,"All fields are include")
  }
-const existinguser=User.findOne({
+const existinguser=await User.findOne({
     $or:[{username},{email}]
  })
  if(existinguser){
-    throw new ApiError(409,
-        "user with email or username already exists"
-    )
-    const avatarLocalPath=req.files?.avatar[0]?.path
-    const coverImagelocalpath=req.files?.coverImage[0]?.path;
+    throw new ApiError(409,"user with email or username already exists"
+    )}
+    console.log(req.files)
+    const avatarLocalPath=req.files?.avatar[0]?.path;
+    // const coverImagelocalpath=req.files?.coverImage[0]?.path;
+    let coverImagelocalpath;
+    if(req.files&&Array.isArray(req.files.coverImage)&&req.files.coverImage.length>0){
+        coverImagelocalpath=req.files.coverImage[0].path;
+    }
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar file is required")
     }
@@ -42,10 +47,10 @@ throw new ApiError(409,"avatar file is require")}
     const check=await User.findById(user._id).select("-password -refreshToken")
     if(!check){
         throw new ApiError(500,"something went wrong")
-    }
+                }
 return res.status(201).json(
-    new ApiResponse(200,check,"user registered successfully")
+        new ApiResponse(200,check,"user registered successfully")
 )
- }
+ 
 })
 export default registerUser;

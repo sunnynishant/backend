@@ -4,6 +4,7 @@ import {User} from "../models/user.model.js"
 import uploadOnCloudinary from "../utils/cloudinary.js"
 import ApiResponse from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 const generateAccessandRefreshToken=async (userId)=>{
     try{
         const user=await User.findById(userId)
@@ -75,12 +76,12 @@ const loginUser=asyncHandler(async (req,res)=>{
     //access and refresh token
     //send cookies
     //response
-    const {email,password,username}=req.body;
-    if(!email&&!password){
+    const {email,password}=req.body;
+    if(!email||!password){
         throw new ApiError(400,"all field are required")
     }
   const user=await User.findOne({
-        $or:[{username},{email}]
+        $or:[{email}]
     })
 if(!user){
     throw new ApiError(404,"user not exist");
@@ -106,8 +107,8 @@ const logoutUser=asyncHandler(async(req,res)=>{
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
-                refreshToken:undefined
+            $unset:{
+                refreshToken:1
             }
         },
             {
@@ -218,14 +219,14 @@ const getUserChannelProfile=asyncHandler(async(req,res)=>{
         }
     },{
         $lookup:{
-            from:"subscription",
+            from:"subscriptions",
             localField:"_id",
             foreignField:"channel",
             as:"subscribers"
         }
     },{
         $lookup:{
-            from:"subscription",
+            from:"subscriptions",
             localField:"_id",
             foreignField:"subscriber",
             as:"subscribedto"
@@ -273,18 +274,18 @@ const getWatchHistory=asyncHandler(async(req,res)=>{
         }
     },{
         $lookup:{
-            from:"video",
+            from:"videos",
             localField:"watchHistory",
             foreignField:"_id",
             as:"watchHistory",
-            pipeLine:[
+            pipeline:[
                 {
                     $lookup:{
-                        from:"user",
+                        from:"users",
                         localField:"owner",
                         foreignField:"_id",
-                        as:owner,
-                        pipeLine:[
+                        as:"owner",
+                        pipeline:[
                             {
                                 $project:{
                                     fullName:1,

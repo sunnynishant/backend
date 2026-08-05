@@ -10,10 +10,10 @@ const commentSchema=new Schema({
         ref:"Video"
     },
     owner:{
-        type:Schema.types.ObjectId,
+        type:Schema.Types.ObjectId,
         ref:"User"
     }
 },{})
 
-videoSchema.plugin(mongooseAggregatePaginate)
+commentSchema.plugin(mongooseAggregatePaginate)
 export const Comment=mongoose.model("comment",commentSchema)

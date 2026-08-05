@@ -29,8 +29,8 @@ const videoSchema=new Schema({
     },
     owner:
     {
-        type:Schema.Types.Objectid,
-        ref:'User'
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
     }
 },{timestamps:true})
 videoSchema.plugin(mongooseAggregatePaginate)

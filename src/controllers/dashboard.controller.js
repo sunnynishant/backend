@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose, { isValidObjectId } from "mongoose"
 import {Video} from "../models/video.model.js"
 import {Subscription} from "../models/subscription.model.js"
 import {Like} from "../models/like.model.js"
@@ -8,10 +8,28 @@ import asyncHandler from "../utils/asyncHandler.js"
 
 const getChannelStats = asyncHandler(async (req, res) => {
     // TODO: Get the channel stats like total video views, total subscribers, total videos, total likes etc.
+    const {channelId}=req.params;
+    if(!isValidObjectId(channelId)){
+        throw new ApiError(404,"invalid channelid")
+    }
+    const totalvideo=await Video.countDocuments({owner:channelId});
+    const totalsubscriber=await Subscription.countDocuments({channel:channelId})
+    const totallikes=await Like.countDocuments({video:{$exists:true},likedBy: { $exists: true }, videoOwner: channelId })
+    const stats={
+        totalvideo,totalsubscriber,totallikes
+    }
+    return res.status(200).json(new ApiResponse(200,stats,"channel fetch video"))
 })
 
 const getChannelVideos = asyncHandler(async (req, res) => {
     // TODO: Get all the videos uploaded by the channel
+    const { channelId } = req.params
+    if (!isValidObjectId(channelId)) throw new ApiError(400, "Invalid channelId")
+
+    // Find all videos owned by this channel
+    const videos = await Video.find({ owner: channelId }).sort({ createdAt: -1 })
+
+    return res.json(new ApiResponse(200, videos, "Channel videos fetched successfully"))
 })
 
 export {

@@ -6,11 +6,15 @@ const likeSchema=new Schema({
     },
     comment:{
         type:Schema.Types.ObjectId,
-        ref:"comment"
+        ref:"Comment"
     },
     likedBy:{
         type:Schema.Types.ObjectId,
         ref:"User"
+    },
+     tweet: {
+        type: Schema.Types.ObjectId,
+        ref: "Tweet"
     },
 },{timeStamps:true})
 export const Like=mongoose.model("Like",likeSchema)
